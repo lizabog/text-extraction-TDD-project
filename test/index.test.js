@@ -34,12 +34,13 @@ describe("Fetch data from url", function () {
         "response is not type not text/html"
       );
     })
-    it('should throw an error “has been redirected” f fails with 300s', function () {
-        const responseStub = sinon.stub(getDocument);
+    it("should throw an error “bad request” If fails with 400 ", function () {
+      const responseStub = sinon.stub(getDocument);
       responseStub.withArgs("http://example.com").returns({
-        status: 400})
-       expect(responseStub).to.Throw("“bad request"); 
-  });
+        status: 400,
+      });
+      expect(responseStub).to.Throw("“bad request");
+    });
   it("should throw unauthorized If fails with 401", function () {
         const responseStub = sinon.stub(getDocument);
         responseStub.withArgs("http://example.com").returns({
@@ -47,5 +48,27 @@ describe("Fetch data from url", function () {
         });
         expect(responseStub).to.Throw("Unauthorized");
   });
+  it("it should  throw “forbidden” If fails with 403", function () {
+    const responseStub = sinon.stub(getDocument);
+    responseStub.withArgs("http://example.com").returns({
+      status: 403,
+    });
+    expect(responseStub).to.Throw("forbidden");
+  });
+  it.skip("it should retry once if still unsuccessful should throw “timeout” If fails with 408", function () {
+    const responseStub = sinon.stub(getDocument);
+    responseStub.withArgs("http://example.com").returns({
+      status: 408,
+    });
+    expect(responseStub).to.Throw("not found");
+  });
+  
+   it("should to throw server error if fails with 500s", function () {
+     const responseStub = sinon.stub(getDocument);
+     responseStub.withArgs("http://example.com").returns({
+       status: 501,
+     });
+     expect(responseStub).to.Throw("server error");
+   });
 });
 })
