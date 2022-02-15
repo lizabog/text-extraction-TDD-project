@@ -6,7 +6,6 @@ const MockAdapter = require("axios-mock-adapter");
 const chaiAsPromised = require("chai-as-promised");
 const chai = require("chai");
 
-
 const { exampleHtml } = require("./exampleHtml");
 const { getDocument } = require("../getDocument");
 chai.use(chaiAsPromised);
@@ -43,9 +42,16 @@ describe("data fetched unsuccessfully", () => {
         { exampleHtml: "no" },
         { "content-type": "application/json; charset=UTF-8" }
       );
-    
-      return expect(getDocument("http://example.com")).to.be.rejectedWith(TypeError, 
-        "not text/html"
-      );
+
+    return expect(getDocument("http://example.com")).to.be.rejectedWith(
+      TypeError,
+      "not text/html"
+    );
+  });
+  it("should throw an error “bad request” If status 400", async function () {
+    mockAxios.onGet("http://example.com").reply(400);
+    return expect(getDocument("http://example.com")).to.be.rejectedWith(
+      "bad request"
+    );
   });
 });
