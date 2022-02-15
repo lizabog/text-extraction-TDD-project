@@ -2,29 +2,50 @@ const { expect } = require("chai");
 const { describe } = require("mocha");
 const sinon = require("sinon");
 const axios = require("axios");
+const MockAdapter = require("axios-mock-adapter");
+const chaiAsPromised = require("chai-as-promised");
+const chai = require("chai");
 
-const exampleHtml = require("./exampleHtml");
-const {getDocument} = require("../getDocument");
 
-describe("Fetch data from url", async function () {
-  describe("data fetched successfully ", async function () {
-    let responseStub;
-    beforeEach(function () {
-      responseStub = sinon.stub(axios, "get");
-      responseStub.withArgs("http://example.com").resolves({
-        status: 200,
-        headers: { "content-type": "text/html; charset=UTF-8" },
-        data:exampleHtml
-      });
-      afterEach(() => {
-        sinon.restore();
-      });
-    });
-    it("should return response if status 200 and content type text/html", async function () {
-      const result = await getDocument("http://example.com");
-     expect(result).to.include("html");
-    });
-    
-    
+const { exampleHtml } = require("./exampleHtml");
+const { getDocument } = require("../getDocument");
+chai.use(chaiAsPromised);
+
+describe("data fetched successfully ", function () {
+  let mockAxios;
+  beforeEach(function () {
+    mockAxios = new MockAdapter(axios);
+    mockAxios
+      .onGet("http://example.com")
+      .reply(200, exampleHtml, { "content-type": "text/html; charset=UTF-8" });
   });
-})
+  afterEach(() => {
+    mockAxios.restore();
+  });
+  it("should return response if status 200 and content type text/html", async function () {
+    const result = await getDocument("http://example.com");
+    expect(result).to.include("html");
+  });
+});
+describe("data fetched unsuccessfully", () => {
+  let mockAxios;
+  beforeEach(function () {
+    mockAxios = new MockAdapter(axios);
+  });
+  afterEach(() => {
+    mockAxios.restore();
+  });
+  it("should throw typeError if content type not text/html ", async () => {
+    mockAxios
+      .onGet("http://example.com")
+      .reply(
+        200,
+        { exampleHtml: "no" },
+        { "content-type": "application/json; charset=UTF-8" }
+      );
+    
+      return expect(getDocument("http://example.com")).to.be.rejectedWith(TypeError, 
+        "not text/html"
+      );
+  });
+});

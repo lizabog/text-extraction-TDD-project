@@ -1,9 +1,14 @@
-const axios = require("axios")
+const axios = require("axios");
 
-async function getDocument(URL)
-{
-    const response = await axios(URL)
-    return await response.data
+async function getDocument(URL) {
+  try {
+    const response = await axios(URL);
+    if (response.headers["content-type"] == "text/html; charset=UTF-8") {
+      return response.data;
+    } else {
+      throw new TypeError("not text/html");
+    }
 
+  } catch (error) {throw error }
 }
-module.exports={getDocument}
+module.exports = { getDocument };
