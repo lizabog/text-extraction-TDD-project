@@ -12,9 +12,13 @@ async function getDocument(URL) {
     
 
   } catch (error) {
-      if (error.response && error.response.status===400){
-      throw "bad request"
-  }else{ throw error}
+      if (error.response && error.response.status === 400) {
+        throw "bad request";
+      } else if (error.response && error.response.status === 401) {
+        throw "unauthorized";
+      } else {
+        throw error;
+      }
     }
 }
 module.exports = { getDocument };

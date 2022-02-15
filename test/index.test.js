@@ -54,4 +54,10 @@ describe("data fetched unsuccessfully", () => {
       "bad request"
     );
   });
+   it("it should throw unauthorized If fails with 401", async function () {
+     mockAxios.onGet("http://example.com").reply(401);
+     return expect(getDocument("http://example.com")).to.be.rejectedWith(
+       "unauthorized"
+     );
+   });
 });
