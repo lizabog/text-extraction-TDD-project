@@ -67,4 +67,10 @@ describe("data fetched unsuccessfully", () => {
        "forbidden"
      );
    });
+   it("should  throw 'not found' If fails with 404", async function () {
+     mockAxios.onGet("http://example.com").reply(404);
+     return expect(getDocument("http://example.com")).to.be.rejectedWith(
+       "not found"
+     );
+   });
 });

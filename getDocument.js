@@ -18,6 +18,8 @@ async function getDocument(URL) {
         throw "unauthorized";
       } else if (error.response && error.response.status === 403) {
         throw "forbidden";
+      } else if (error.response && error.response.status === 404) {
+        throw "not found";
       } else {
         throw error;
       }
