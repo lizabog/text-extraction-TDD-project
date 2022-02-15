@@ -5,10 +5,9 @@ const axios = require("axios");
 let getDocument;
 let convertDocument;
 let convert;
-const sandbox = sinon.createSandbox();
 
-describe("Fetch data from url", function () {
-  describe("data fetched successfully", function () {
+describe("Fetch data from url", async function () {
+  describe("data fetched successfully",async function () {
     let responseStub;
     beforeEach(function () {
       responseStub = sinon.stub(axios, "get");
@@ -55,7 +54,7 @@ describe("Fetch data from url", function () {
       const result = await getDocument("http://example.com");
       expect(result).to.Throw("“bad request");
     });
-    it("should throw unauthorized If fails with 401", function () {
+    it("should throw unauthorized If fails with 401",async function () {
       responseStub.withArgs("http://example.com").resolves({
         status: 401,
       });
@@ -117,3 +116,21 @@ describe("Convert the fetched response", () => {
     expect(consoleSpy.calledWith(response)).to.be.true
   });
 });
+describe('Conversion from text to an object', () => { 
+    let convertStub
+    beforeEach(() => {
+        convertStub= sinon.stub(convert)
+    });
+    afterEach(() => {
+        sinon.restore()
+    });
+    it('it should throw typeError “this is not html” if received data that’s not html', () => {
+        const notHtmldata= {
+        status: 200,
+        headers: { "content-type": "application/json" }}
+        convert(notHtmldata)
+        expect(convertStub.threw("TypeError")).to.be.true
+    });
+    
+
+ })
