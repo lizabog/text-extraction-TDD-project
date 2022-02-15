@@ -54,10 +54,17 @@ describe("data fetched unsuccessfully", () => {
       "bad request"
     );
   });
-   it("it should throw unauthorized If fails with 401", async function () {
+   it("should throw unauthorized If fails with 401", async function () {
      mockAxios.onGet("http://example.com").reply(401);
      return expect(getDocument("http://example.com")).to.be.rejectedWith(
        "unauthorized"
+     );
+   });
+
+   it("should  throw “forbidden” If fails with 403", async function () {
+     mockAxios.onGet("http://example.com").reply(403);
+     return expect(getDocument("http://example.com")).to.be.rejectedWith(
+       "forbidden"
      );
    });
 });

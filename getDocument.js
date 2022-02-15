@@ -16,6 +16,8 @@ async function getDocument(URL) {
         throw "bad request";
       } else if (error.response && error.response.status === 401) {
         throw "unauthorized";
+      } else if (error.response && error.response.status === 403) {
+        throw "forbidden";
       } else {
         throw error;
       }
