@@ -1,5 +1,6 @@
 const axios = require("axios");
-
+const jsdom = require("jsdom");
+const { JSDOM } = jsdom;
 class ConvertHtmlToString {
   constructor(url) {
     this.url = url;
@@ -44,7 +45,9 @@ class ConvertHtmlToString {
     if (!(typeof htmlData === "string" && htmlData.includes("<html>"))) {
       throw new TypeError ("this is not a valid html");
     }
-    return {title:"",body:""}
+     const dom = new JSDOM(htmlData);
+     const title = dom.window.document.querySelector("h1").textContent;
+    return {title:title,body:""}
   }
   async convertResponse() {
     const htmlData = await this.getDocument();

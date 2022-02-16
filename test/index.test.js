@@ -136,4 +136,9 @@ it ("should return an object containing title and body", () => {
   const result = convertExample.convert(exampleHtml)
   expect (result).to.have.all.keys(["title","body"])
 })
+it("should have words from original title in .title", () => {
+  const result = convertExample.convert(exampleHtml);
+  expect(result.title).to.include("Example Domain");
+});
+
 });
