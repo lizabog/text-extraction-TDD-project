@@ -10,10 +10,10 @@ chai.use(chaiAsPromised);
 chai.use(sinonChai);
 
 const { ConvertHtmlToString } = require("../index");
-const { exampleHtml } = require("./exampleHtml");
+const { exampleHtml, exampleObject } = require("./exampleHtml");
 
 
-describe("data fetched successfully ", function () {
+describe("data fetched successfully ", function () {console.log(exampleObject)
   let mockAxios;
   let convertExample;
   let axiosStub;
@@ -43,12 +43,10 @@ describe("data fetched unsuccessfully", () => {
   let axiosStub;
   let convertExample;
   beforeEach(function () {
-    // mockAxios = new MockAdapter(axios);
     convertExample = new ConvertHtmlToString("http://example.com");
     axiosStub = sinon.stub(axios, "get");
   });
   afterEach(() => {
-    // mockAxios.restore();
     sinon.restore();
   });
   it("should throw typeError if content type not text/html ", async () => {
@@ -81,7 +79,13 @@ describe("data fetched unsuccessfully", () => {
     axiosStub.resolves({ status: 403 });
     return expect(convertExample.getDocument()).to.be.rejectedWith("forbidden");
   });
-  it.skip("should to throw server error if fails with 500s", async function () {
+  it("should  throw 'not found' If fails with 404", async function () {
+    axiosStub.resolves({ status: 404 });
+    return expect(convertExample.getDocument()).to.be.rejectedWith(
+      "not found"
+    );
+  });
+  it("should to throw server error if fails with 500s", async function () {
     axiosStub.resolves({ status: 501 });
     return expect(convertExample.getDocument()).to.be.rejectedWith(
       "server error"
@@ -120,6 +124,12 @@ describe("Convert the fetched response", () => {
   it("should throw if getDocument fails", async () => {
     getDocumentStub.rejects("failed");
     expect(convertExample.convertResponse()).to.throw;
+  });
+  it("should console log with object from coversion", async () => {
+const consoleSpy=sinon.spy(console,"log")
+    await convertExample.convertResponse();
+
+    expect(consoleSpy.calledWith(exampleObject)).to.be.true;
   });
 });
 

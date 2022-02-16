@@ -26,16 +26,7 @@ class ConvertHtmlToString {
       } else if (error.status && error.status === 404) {
         throw "not found";
       } else if (error.status && 499 < error.status < 600) {
-        try {
-          const response = await axios(this.url);
-          if (response.status !== 200) {
-            throw { status: response.status };
-          }
-        } catch (error) {
-          if (error.status && 499 < error.status < 600) {
-            throw "server error";
-          }
-        }
+        throw "server error";
       } else {
         throw error;
       }
@@ -43,18 +34,21 @@ class ConvertHtmlToString {
   }
   convert(htmlData) {
     if (!(typeof htmlData === "string" && htmlData.includes("<html>"))) {
-      throw new TypeError ("this is not a valid html");
+      throw new TypeError("this is not a valid html");
     }
-     const dom = new JSDOM(htmlData);
-     const title = dom.window.document.querySelector("h1").textContent;
-     const pTags=dom.window.document.querySelectorAll("p")
-     let body=""
-    pTags.forEach(tag => {body=body+tag.textContent})
-    return {title:title,body:body}
+    const dom = new JSDOM(htmlData);
+    const title = dom.window.document.querySelector("h1").textContent;
+    const pTags = dom.window.document.querySelectorAll("p");
+    let body = "";
+    pTags.forEach((tag) => {
+      body = body + tag.textContent;
+    });
+    return { title: title, body: body };
   }
   async convertResponse() {
     const htmlData = await this.getDocument();
-   this.convert(htmlData);
+    const convertedText = this.convert(htmlData);
+    console.log(convertedText);
   }
 }
 
