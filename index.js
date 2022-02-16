@@ -47,7 +47,10 @@ class ConvertHtmlToString {
     }
      const dom = new JSDOM(htmlData);
      const title = dom.window.document.querySelector("h1").textContent;
-    return {title:title,body:""}
+     const pTags=dom.window.document.querySelectorAll("p")
+     let body=""
+    pTags.forEach(tag => {body=body+tag.textContent})
+    return {title:title,body:body}
   }
   async convertResponse() {
     const htmlData = await this.getDocument();

@@ -140,5 +140,16 @@ it("should have words from original title in .title", () => {
   const result = convertExample.convert(exampleHtml);
   expect(result.title).to.include("Example Domain");
 });
-
+it("should have the same charcount as original title in .title", () => {
+  const result = convertExample.convert(exampleHtml);
+  expect(result.title.length).to.be.equal(14);
+});
+it("should have words from original body in .body", () => {
+  const result = convertExample.convert(exampleHtml);
+  expect(result.body).to.include("literature without prior");
+});
+it("should have the same charcount as original body in .body", () => {
+  const result = convertExample.convert(exampleHtml);
+  expect(result.body.length).to.be.equal(171);
+});
 });
