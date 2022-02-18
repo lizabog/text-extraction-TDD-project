@@ -4,15 +4,20 @@ const { JSDOM } = jsdom;
 class ConvertHtmlToString {
   constructor(url) {
     this.url = url;
+    this.retry = this.retry.bind(this);
   }
   async getDocument() {
     try {
-      const response = await axios.get(this.url);
-      if (response.status !== 200) {
+      let response = await axios.get(this.url);
+
+      if ((await response.status) !== 200) {
         throw { status: response.status };
       }
-      if (response.headers["content-type"] == "text/html; charset=UTF-8") {
-        return response.data;
+
+      if (
+        (await response.headers["content-type"]) == "text/html; charset=UTF-8"
+      ) {
+        return response.data || retryResponse.data;
       } else {
         throw new TypeError("not text/html");
       }
@@ -26,6 +31,12 @@ class ConvertHtmlToString {
       } else if (error.status && error.status === 404) {
         throw "not found";
       } else if (error.status && 499 < error.status < 600) {
+        const retried = await new Promise((resolve) =>
+          setTimeout(resolve(this.retry()), 150)
+        );
+        const retryResult = await retried;
+        if (retryResult.status && retryResult.status === 200)
+          return retryResult;
         throw "server error";
       } else {
         throw error;
@@ -50,6 +61,10 @@ class ConvertHtmlToString {
     const convertedText = this.convert(htmlData);
     console.log(convertedText);
   }
+  retry = async () => {
+    const retried = await axios.get(this.url);
+    return retried;
+  };
 }
 
 module.exports = { ConvertHtmlToString };

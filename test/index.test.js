@@ -12,9 +12,7 @@ chai.use(sinonChai);
 const { ConvertHtmlToString } = require("../index");
 const { exampleHtml, exampleObject } = require("./exampleHtml");
 
-
-describe("data fetched successfully ", function () {console.log(exampleObject)
-  let mockAxios;
+describe("data fetched successfully ", function () {
   let convertExample;
   let axiosStub;
   before(function () {
@@ -39,7 +37,6 @@ describe("data fetched successfully ", function () {console.log(exampleObject)
   });
 });
 describe("data fetched unsuccessfully", () => {
-  let mockAxios;
   let axiosStub;
   let convertExample;
   beforeEach(function () {
@@ -81,17 +78,29 @@ describe("data fetched unsuccessfully", () => {
   });
   it("should  throw 'not found' If fails with 404", async function () {
     axiosStub.resolves({ status: 404 });
-    return expect(convertExample.getDocument()).to.be.rejectedWith(
-      "not found"
-    );
+    return expect(convertExample.getDocument()).to.be.rejectedWith("not found");
   });
   it("should to throw server error if fails with 500s", async function () {
     axiosStub.resolves({ status: 501 });
+        const clock = sinon.useFakeTimers();
+                    await Promise.resolve();
+
+    clock.tick(200);
+
     return expect(convertExample.getDocument()).to.be.rejectedWith(
       "server error"
     );
   });
-});
+  it("should retry if fails with 500s", async function () {
+    axiosStub.resolves({ status: 502 }).onSecondCall().resolves({ status: 200 })
+    const clock = sinon.useFakeTimers();
+    const retrySpy = sinon.spy(convertExample, "retry");
+    await convertExample.getDocument();
+    clock.tick(200);
+    await Promise.resolve();
+    expect(retrySpy.calledOnce).to.be.true;
+  });
+  });
 
 describe("Convert the fetched response", () => {
   let getDocumentStub;
@@ -101,19 +110,21 @@ describe("Convert the fetched response", () => {
 
   beforeEach(() => {
     axiosStub = sinon.stub(axios, "get").resolves({
-        status: 200,
-        headers: { "content-type": "text/html; charset=UTF-8" },
-        data: exampleHtml,
-      });
+      status: 200,
+      headers: { "content-type": "text/html; charset=UTF-8" },
+      data: exampleHtml,
+    });
     convertExample = new ConvertHtmlToString("http://example.com");
 
-    getDocumentStub = sinon.stub(convertExample, "getDocument").returns(exampleHtml);
+    getDocumentStub = sinon
+      .stub(convertExample, "getDocument")
+      .returns(exampleHtml);
     convertSpy = sinon.spy(convertExample, "convert");
   });
   afterEach(() => {
     sinon.restore();
   });
-  it("shouls call fetch once ", async () => {
+  it("should call fetch once ", async () => {
     await convertExample.convertResponse();
     expect(getDocumentStub.calledOnce).to.be.true;
   });
@@ -126,7 +137,7 @@ describe("Convert the fetched response", () => {
     expect(convertExample.convertResponse()).to.throw;
   });
   it("should console log with object from coversion", async () => {
-const consoleSpy=sinon.spy(console,"log")
+    const consoleSpy = sinon.spy(console, "log");
     await convertExample.convertResponse();
 
     expect(consoleSpy.calledWith(exampleObject)).to.be.true;
@@ -134,32 +145,31 @@ const consoleSpy=sinon.spy(console,"log")
 });
 
 describe("test convert method", () => {
-    let convertExample;
-beforeEach(() => {
+  let convertExample;
+  beforeEach(() => {
     convertExample = new ConvertHtmlToString("http://example.com");
-
-});
-  it("should throw typeError “this is not html” if received data that’s not html", () => {
-   expect(()=>convertExample.convert({ hey: "there" })).throws(TypeError);
   });
-it ("should return an object containing title and body", () => {
-  const result = convertExample.convert(exampleHtml)
-  expect (result).to.have.all.keys(["title","body"])
-})
-it("should have words from original title in .title", () => {
-  const result = convertExample.convert(exampleHtml);
-  expect(result.title).to.include("Example Domain");
-});
-it("should have the same charcount as original title in .title", () => {
-  const result = convertExample.convert(exampleHtml);
-  expect(result.title.length).to.be.equal(14);
-});
-it("should have words from original body in .body", () => {
-  const result = convertExample.convert(exampleHtml);
-  expect(result.body).to.include("literature without prior");
-});
-it("should have the same charcount as original body in .body", () => {
-  const result = convertExample.convert(exampleHtml);
-  expect(result.body.length).to.be.equal(171);
-});
+  it("should throw typeError “this is not html” if received data that’s not html", () => {
+    expect(() => convertExample.convert({ hey: "there" })).throws(TypeError);
+  });
+  it("should return an object containing title and body", () => {
+    const result = convertExample.convert(exampleHtml);
+    expect(result).to.have.all.keys(["title", "body"]);
+  });
+  it("should have words from original title in .title", () => {
+    const result = convertExample.convert(exampleHtml);
+    expect(result.title).to.include("Example Domain");
+  });
+  it("should have the same charcount as original title in .title", () => {
+    const result = convertExample.convert(exampleHtml);
+    expect(result.title.length).to.be.equal(14);
+  });
+  it("should have words from original body in .body", () => {
+    const result = convertExample.convert(exampleHtml);
+    expect(result.body).to.include("literature without prior");
+  });
+  it("should have the same charcount as original body in .body", () => {
+    const result = convertExample.convert(exampleHtml);
+    expect(result.body.length).to.be.equal(171);
+  });
 });
